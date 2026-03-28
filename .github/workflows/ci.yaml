@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_VERSION: stable
+  RUSTFLAGS: -D warnings # Fail on warnings
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: "Test ${{ matrix.crate.name }}${{ matrix.crate.features && format(' ({0})', matrix.crate.features) || '' }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          # You can add space-separated features to the `features` field,
+          # and they will be passed to the build/test command.
+          - name: replace_me_crate_name
+    steps:
+      - name: Setup | Calculate feature flag
+        id: features
+        run: |
+          if [ "${{ matrix.crate.features }}" != "" ]; then
+              echo "feature_flag=--features ${{ matrix.crate.features }}" >> $GITHUB_OUTPUT
+          else
+              echo "feature_flag=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup | Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup | Rust Toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: rustfmt
+
+      - name: Build | Compile Project
+        working-directory: ./${{ matrix.crate.name }}
+        run: |
+          cargo build --verbose ${{ steps.features.outputs.feature_flag }}
+
+      - name: Run | Tests
+        working-directory: ./${{ matrix.crate.name }}
+        run: |
+          cargo test --verbose ${{ steps.features.outputs.feature_flag }}
+
+  clippy:
+    runs-on: ubuntu-latest
+    name: "Run clippy"
+    steps:
+      - name: Setup | Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup | Rust Toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: clippy
+
+      - name: Run | Clippy
+        run: cargo clippy --verbose
+
+  format:
+    runs-on: ubuntu-latest
+    name: "Check formatting"
+    steps:
+      - name: Setup | Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup | Rust Toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: rustfmt
+
+      - name: Rustfmt Check
+        uses: actions-rust-lang/rustfmt@v1
