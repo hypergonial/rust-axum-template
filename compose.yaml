@@ -1,5 +1,5 @@
 services:
-  backend:
+  replace_me_crate_name:
     restart: always
     build:
       context: .
