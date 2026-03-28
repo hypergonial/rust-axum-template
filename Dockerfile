@@ -39,7 +39,7 @@ EOF
 # We do not need the Rust toolchain to run the binary!
 FROM debian:trixie-slim AS runtime
 WORKDIR /app
-# Required by AWS-SDK which in turn needs rustls to verify the certificates
+# Required by rustls for TLS to work
 RUN <<EOF
   apt-get update
   apt-get install -y ca-certificates
