@@ -4,5 +4,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # Set this to 'release' for an optimized build,
+        # or 'debug' for faster builds with debug symbols.
+        BUILD_TYPE: debug
     ports:
       - 8080:8080
