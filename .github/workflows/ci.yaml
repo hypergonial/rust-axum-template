@@ -45,12 +45,14 @@ jobs:
           components: rustfmt
 
       - name: Build | Compile Project
-        working-directory: ./${{ matrix.crate.name }}
+        # Uncomment if in a workspace
+        # working-directory: ./${{ matrix.crate.name }}
         run: |
           cargo build --verbose ${{ steps.features.outputs.feature_flag }}
 
       - name: Run | Tests
-        working-directory: ./${{ matrix.crate.name }}
+        # Uncomment if in a workspace
+        # working-directory: ./${{ matrix.crate.name }}
         run: |
           cargo test --verbose ${{ steps.features.outputs.feature_flag }}
 
