@@ -19,7 +19,7 @@ use replace_me_crate_name::{main_router, state::App};
 static GLOBAL: MiMalloc = MiMalloc;
 
 #[cfg(unix)]
-async fn handle_signals(state: App) {
+async fn graceful_shutdown(state: App) {
     let mut sigterm = signal(SignalKind::terminate()).expect("Failed to create SIGTERM signal listener");
 
     tokio::select! {
@@ -34,7 +34,7 @@ async fn handle_signals(state: App) {
 }
 
 #[cfg(not(unix))]
-async fn handle_signals(state: App) {
+async fn graceful_shutdown(state: App) {
     ctrl_c().await.expect("Failed to create CTRL+C signal listener");
     state.close().await;
 }
@@ -80,7 +80,7 @@ async fn main() -> Result<()> {
         // voodoo magic to make trailing slashes go away from URLs
         ServiceExt::<Request>::into_make_service(NormalizePathLayer::trim_trailing_slash().layer(router)),
     )
-    .with_graceful_shutdown(handle_signals(app))
+    .with_graceful_shutdown(graceful_shutdown(app))
     .await
     .expect("Failed creating server");
 

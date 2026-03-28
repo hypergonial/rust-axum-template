@@ -5,6 +5,7 @@ use crate::state::App;
 
 pub mod rest;
 pub mod state;
+pub mod types;
 
 /// The main router for the application.
 /// This is the entry point for all requests.
